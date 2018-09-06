@@ -9,18 +9,46 @@ app.use(cookieParser())
 
 app.set("view engine", "ejs");
 
-function generateRandomString() {
+function generateRandomString(length) {
   var randomString = "";
   var charset = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  for( var i=0; i < 6; i++ )
+  for( var i=0; i < length; i++ )
     randomString += charset.charAt(Math.floor(Math.random() * charset.length));
-  return randomString;
+  return randomString; 
 };
 
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const usersDB = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  },
+  "user3RandomID": {
+    id: "user3RandomID", 
+    email: "user3@example.com", 
+    password: "simple"
+  }
+}
+ const addNewUser = function(id, userEmail, password){
+    newRecord = {
+      "id": id,
+      "userEmail": userEmail,
+      "password": password
+    };
+    return newRecord;
+ }
+
+
 
 app.get("/", (req, res) => {
   res.send("Hello from new Location!");
@@ -69,7 +97,7 @@ app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id]= req.body.longURL
   res.redirect("/urls");
 });
-
+ 
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
   
@@ -79,6 +107,23 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("username")
   //clear.cookie('username', req.body.username);
+  res.redirect("/urls");
+});
+
+app.get("/register", (req, res) => {
+  // let templateVars = {  username: req.cookies["username"], urls: urlDatabase };
+  res.render("urls_register");
+});
+
+app.post("/register", (req, res) => {
+  const generatedId = generateRandomString(6); 
+  const userEmail = req.body.email;
+  const password = req.body.password;
+
+
+  const newUser = addNewUser(generatedId, userEmail, password); //calling this function
+  usersDB[generatedId] = newUser // adding the new user to DB, everytime we send POST request
+  console.log(JSON.stringify(usersDB));
   res.redirect("/urls");
 });
 
