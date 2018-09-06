@@ -61,8 +61,16 @@ const usersDB = {
    }
    return null;
  }
-//  console.log(JSON.parse(findUserByEmail("user2@example.com")));
+ const findUserByID = function (id) {
 
+  for (let record in usersDB) {
+    const user = usersDB[record]
+    if (user.id === id) {
+       return user; 
+    }
+  return null;
+  } 
+ }
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -81,11 +89,15 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  if (findUserByID(req.cookies["user_id"])) { 
   let templateVars = {
     users: usersDB,
     username: req.cookies["user_id"],
   };
   res.render("urls_new", templateVars);
+} else{
+  res.redirect("/login")
+  }
 });
 
 app.post("/urls", (req, res) => {
