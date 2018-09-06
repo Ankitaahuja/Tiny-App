@@ -118,8 +118,13 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
  
+app.get("/login", (req, res) => {
+  
+  res.render("urls_login");
+});
+
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.user_id);
+  // res.cookie('username', req.body.user_id);
   
   res.redirect("/urls");
 });
