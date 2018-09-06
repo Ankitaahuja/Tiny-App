@@ -124,9 +124,19 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  // res.cookie('username', req.body.user_id);
+  if (!findUserByEmail(req.body.email)) {
+    res.send("Email doesn't exist. Please register first");
+    res.status(400);
+  } else {
+    if (findUserByEmail(req.body.email).password !== req.body.password){
+      res.send("Email and Password doesn't match");
+      res.status(400);
+    }else{
+  res.cookie('user_id', req.body.email);
   
   res.redirect("/urls");
+    }
+  }
 });
 
 app.post("/logout", (req, res) => {
