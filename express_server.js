@@ -39,16 +39,29 @@ const usersDB = {
     password: "simple"
   }
 }
- const addNewUser = function(id, userEmail, password){
-    newRecord = {
-      "id": id,
-      "userEmail": userEmail,
-      "password": password
+// this function adds the new user into DB
+ const addNewUser = function(userEmail, password){
+  const generatedId = generateRandomString(6);
+    const newUser = {
+      id: generatedId,
+      email: userEmail,
+      password: password
     };
-    return newRecord;
+    usersDB[generatedId] = newUser
+    return newUser;
  }
+// this function will check if the user exists in DB
+ const findUserByEmail = function (email) {
 
-
+   for (let record in usersDB) {
+     const user = usersDB[record]
+     if (user.email === email) {
+        return user; //returns the whole record of that user 
+     }
+   }
+   return null;
+ }
+//  console.log(JSON.parse(findUserByEmail("user2@example.com")));
 
 app.get("/", (req, res) => {
   res.send("Hello from new Location!");
@@ -106,25 +119,32 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie("username")
-  //clear.cookie('username', req.body.username);
+  
   res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
-  // let templateVars = {  username: req.cookies["username"], urls: urlDatabase };
+  
   res.render("urls_register");
 });
 
 app.post("/register", (req, res) => {
-  const generatedId = generateRandomString(6); 
+ 
   const userEmail = req.body.email;
   const password = req.body.password;
 
-
-  const newUser = addNewUser(generatedId, userEmail, password); //calling this function
-  usersDB[generatedId] = newUser // adding the new user to DB, everytime we send POST request
-  console.log(JSON.stringify(usersDB));
+   if (password !== req.body.confirmPassword || !password || !userEmail ) {
+    res.send("Please provide valid email and password. Please make sure to match the passwords!")
+    res.status(400);
+   } 
+   else if (findUserByEmail(userEmail)) {
+     res.send("email already exists");
+     res.status(400); 
+   } else {
+  const newUser = addNewUser(userEmail, password);
+  res.cookie("username", findUserByEmail(userEmail).id);
   res.redirect("/urls");
+  }
 });
 
 app.get("/urls.json", (req, res) => {
