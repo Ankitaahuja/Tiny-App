@@ -64,7 +64,7 @@ const usersDB = {
 //  console.log(JSON.parse(findUserByEmail("user2@example.com")));
 
 app.get("/", (req, res) => {
-  res.send("Hello from new Location!");
+  res.redirect("/urls");
 });
 
 app.get("/hello", (req, res) => {
@@ -132,7 +132,7 @@ app.post("/login", (req, res) => {
       res.send("Email and Password doesn't match");
       res.status(400);
     }else{
-  res.cookie('user_id', req.body.email);
+  res.cookie('user_id', findUserByEmail(req.body.email).id);
   
   res.redirect("/urls");
     }
@@ -165,7 +165,7 @@ app.post("/register", (req, res) => {
    } else {
   const newUser = addNewUser(userEmail, password);
   res.cookie("user_id", findUserByEmail(userEmail).id);
-  res.redirect("/urls");
+  res.redirect("/");
   }
 });
 
