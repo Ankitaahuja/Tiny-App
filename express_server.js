@@ -73,13 +73,17 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = {  username: req.cookies["username"], urls: urlDatabase };
+  let templateVars = {  
+    users: usersDB,
+    username: req.cookies["user_id"],
+    urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    users: usersDB,
+    username: req.cookies["user_id"],
   };
   res.render("urls_new", templateVars);
 });
@@ -92,7 +96,10 @@ app.post("/urls", (req, res) => {
 });
 // console.log(urlDatabase);
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { username: req.cookies["username"], shortURL: req.params.id, urls: urlDatabase };
+  let templateVars = { 
+    users: usersDB, 
+    username: findUserByEmail(req.cookies["user_id"]).email, 
+    shortURL: req.params.id, urls: urlDatabase };
   res.render("urls_show", templateVars);
 });
 
@@ -112,13 +119,13 @@ app.post("/urls/:id", (req, res) => {
 });
  
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
+  res.cookie('username', req.body.user_id);
   
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username")
+  res.clearCookie("user_id")
   
   res.redirect("/urls");
 });
@@ -142,7 +149,7 @@ app.post("/register", (req, res) => {
      res.status(400); 
    } else {
   const newUser = addNewUser(userEmail, password);
-  res.cookie("username", findUserByEmail(userEmail).id);
+  res.cookie("user_id", findUserByEmail(userEmail).id);
   res.redirect("/urls");
   }
 });
