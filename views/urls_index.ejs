@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
+    
     <title>TinyApp</title>
 </head>
 <%- include("partials/_header"); %>
@@ -10,12 +10,14 @@
     <h2>Your Links:</h2>
         
     <ul>
+            <%  if(username){ %>
         <% for (var url in urls) { %>
-            <li><%=  url %> ----> <%= urls[url] %></li>
+            <li><%=  url %> ----> <%= urls[url].longURL %></li>
             <a href="/urls/<%= url%>">Edit</a> 
             <form method="POST" action="/urls/<%= url%>/delete">
             <button type="Submit">Delete</button>
         </form>
+        <% } %>
         <% }; %>
     </ul>
 </body>

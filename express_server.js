@@ -22,6 +22,17 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+var updatedDatabase = {
+  "b2xVn2" : { shortURL: "b2xVn2",
+                longURL: "http://www.lighthouselabs.ca",
+                user_id: "userRandomID" // hardcorded 
+                },
+  "9sm5xK": {  shortURL: "9sm5xK",
+               longURL: "http://www.google.com",
+                user_id: "uasfvzzdf" // hardcorded
+            }
+};
+
 const usersDB = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -71,6 +82,18 @@ const usersDB = {
   return null;
   } 
  }
+
+ const findUrlsByID = function (id) {
+
+  for (let urlsRecord in updatedDatabase) {
+    // const user = usersDB[record]
+    if (updatedDatabase[urlsRecord].user_id === id) {
+       return urlsRecord; 
+    }
+  return null;
+  } 
+ }
+
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -81,15 +104,35 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = {  
-    users: usersDB,
-    username: req.cookies["user_id"],
-    urls: urlDatabase };
-  res.render("urls_index", templateVars);
+  if(req.cookies.user_id){
+    let templateVars = { 
+      username: req.cookies["user_id"],
+   //changed username to user id by looking the user id from cookies, not using this now -->username:req.cookies.username,
+      urls: updatedDatabase // DB has been updated with new id, shortURL and longURL from app.post
+     };
+    
+    res.render("urls_index", templateVars);
+
+    }else {
+      res.redirect('/login')
+    }
+  });
+  
+//   let templateVars = {  
+//     users: usersDB,
+//     username: req.cookies["user_id"],
+//     urls: urlDatabase };
+//   res.render("urls_index", templateVars);
+// });
+
+app.post("/urls", (req, res) => {
+  console.log(req.body.longURL); 
+  urlDatabase[generateRandomString()] = req.body.longURL;
+  res.redirect("/urls")
 });
 
 app.get("/urls/new", (req, res) => {
-  if (findUserByID(req.cookies["user_id"])) { 
+  if (req.cookies["user_id"]) { 
   let templateVars = {
     users: usersDB,
     username: req.cookies["user_id"],
@@ -100,12 +143,7 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body.longURL); 
-  urlDatabase[generateRandomString()] = req.body.longURL;
-  
-  res.redirect("/urls")
-});
+
 // console.log(urlDatabase);
 app.get("/urls/:id", (req, res) => {
   let templateVars = { 
