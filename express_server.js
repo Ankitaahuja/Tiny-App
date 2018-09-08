@@ -22,16 +22,6 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-var updatedDatabase = {
-  "b2xVn2" : { shortURL: "b2xVn2",
-                longURL: "http://www.lighthouselabs.ca",
-                user_id: "userRandomID" // hardcorded 
-                },
-  "9sm5xK": {  shortURL: "9sm5xK",
-               longURL: "http://www.google.com",
-                user_id: "uasfvzzdf" // hardcorded
-            }
-};
 
 const usersDB = { 
   "userRandomID": {
@@ -72,6 +62,7 @@ const usersDB = {
    }
    return null;
  }
+
  const findUserByID = function (id) {
 
   for (let record in usersDB) {
@@ -83,16 +74,6 @@ const usersDB = {
   } 
  }
 
- const findUrlsByID = function (id) {
-
-  for (let urlsRecord in updatedDatabase) {
-    // const user = usersDB[record]
-    if (updatedDatabase[urlsRecord].user_id === id) {
-       return urlsRecord; 
-    }
-  return null;
-  } 
- }
 
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -103,33 +84,50 @@ app.get("/hello", (req, res) => {
   res.render("hello_world", templateVars);
 });
 
+
+var updatedUrlDatabase = {
+  "b2xVn2" : { shortURL: "b2xVn2",
+                longURL: "http://www.lighthouselabs.ca",
+                user_id: "userRandomID" // hardcorded 
+                },
+  "9sm5xK": {  shortURL: "9sm5xK",
+               longURL: "http://www.google.com",
+                user_id: "user2RandomID" // hardcorded
+            }
+};
+
+const findUrlsByID = function (id) {
+  let userSpecificURLArray = [];
+  for (let urlsRecord in updatedUrlDatabase) {
+    if (updatedUrlDatabase[urlsRecord].user_id === id) {
+      userSpecificURLArray.push(updatedUrlDatabase[urlsRecord]);//Gives Nested Object [Value]
+    }
+  } 
+  return userSpecificURLArray;
+ }
+
+
 app.get("/urls", (req, res) => {
-  if(req.cookies.user_id){
+  if(req.cookies.user_id){  
     let templateVars = { 
       username: req.cookies["user_id"],
    //changed username to user id by looking the user id from cookies, not using this now -->username:req.cookies.username,
-      urls: updatedDatabase // DB has been updated with new id, shortURL and longURL from app.post
+      urls: findUrlsByID(req.cookies["user_id"]) // This contains the user Specific URL Array
      };
-    
     res.render("urls_index", templateVars);
-
     }else {
       res.redirect('/login')
     }
   });
   
-//   let templateVars = {  
-//     users: usersDB,
-//     username: req.cookies["user_id"],
-//     urls: urlDatabase };
-//   res.render("urls_index", templateVars);
-// });
 
 app.post("/urls", (req, res) => {
   console.log(req.body.longURL); 
-  urlDatabase[generateRandomString()] = req.body.longURL;
+  updatedUrlDatabase[generateRandomString()] = req.body.longURL;
   res.redirect("/urls")
 });
+
+
 
 app.get("/urls/new", (req, res) => {
   if (req.cookies["user_id"]) { 
@@ -148,23 +146,24 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = { 
     users: usersDB, 
-    username: findUserByEmail(req.cookies["user_id"]).email, 
+    username: findUserByEmail(req.cookies[user_id]).email, 
+
     shortURL: req.params.id, urls: urlDatabase };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL]
+  let longURL = updatedUrlDatabase[req.params.shortURL]
   res.redirect(longURL);
 }); 
 app.post("/urls/:id/delete", (req, res) => {
   console.log(req.params)
- delete urlDatabase[req.params.id]
+ delete updatedUrlDatabase[req.params.id]
   res.redirect("/urls");
 });
 app.post("/urls/:id", (req, res) => {
   console.log(req.body)
-  urlDatabase[req.params.id]= req.body.longURL
+  updatedUrlDatabase[req.params.id]= req.body.longURL
   res.redirect("/urls");
 });
  
@@ -220,7 +219,7 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  res.json(updatedUrlDatabase);
 });
 
 app.get("/hello", (req, res) => {
